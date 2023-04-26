@@ -1,0 +1,53 @@
+exec (acomp a) (0,s,[]) == (length (acomp a), s, [aval a s])
+
+Proof:
+Case for (N x)
+LHS 
+= exec (acomp a) (0, s, [])
+= exec (acomp (N x)) (0, s, [])
+= exec [LOADI x] (0, s, [])
+= exec [] (iexec (LOADI x) (0, s, []))
+= exec [] (1, s, [x])
+= (1, s, [x]) -- Simplification of the left hand side
+RHS
+= (length (acomp (N x)), s, [aval (N x) s]) -- (length (acomp (N x))) can be simplified to 1 as shown before
+= (1, s, [aval (N x) s]) -- aval (N x) s can be simplified to x by definition of aval
+= (1, s, [x]) -- Simplification of the right hand side
+Thus RHS == LHS
+This proves the general case for (N x) and therefore the statements are always equal for (N x)
+
+Case for (V v)
+LHS
+= exec (acomp a) (0, s, [])
+= exec (acomp (V v) (0, s, []))
+= exec [LOAD v] (0, s, [])
+= exec [] (iexec (LOAD v) (0, s, [])) -- loads the corresponding value of variable v onto the stack so for the purpose of the proof it can be x
+= exec [] (1, s, [x])
+= (1, s, [x])
+RHS
+= (length (acomp (V v)), s, [aval (V v) s]) -- (length (acomp (V v))) can be simplified to 1 as shown before
+= (1, s, [aval (V v) s]) -- (aval (V v) s) similar to the iexec load, this takes the corresponding value of variable v which we can assume is x
+= (1, s, [x])
+Thus RHS == LHS
+This proves the general case for (V v) and therefore the statements are always equal for (V v)
+
+*At the [(aval (V v) s)] and the (iexec (LOAD v) (0, s, [])), because s is the same, both of these expressions evaluate to what is desired. In the case of aval the result would be [x] and in the case of iexec the result would be (1, s, [x])
+
+Case for plus
+LHS:
+= exec (acomp a) (0, s, [])
+= exec (acomp (Plus x y)) (0, s, [])
+= exec [LOADI x, LOAD v, ADD] (0, s, [])
+= exec [LOAD v, ADD] iexec ((LOADI x), (0, s, [])) -- x is loaded onto the stack
+= exec [ADD] iexec ((LOAD v), (1, s, [x])) -- the corresponding value of v (x1) is loaded onto the stack
+= exec [] iexec (ADD, (2, s, [x, x1]))
+= exec [] (3, s, [x+x1])
+= (3, s, [x + x1])
+RHS
+= (length (acomp a), s, [aval a s])
+= (length (acomp (Plus x y)), s, [aval (Plus x y) s]) -- acomp can be simplified to the three instructions
+= (length [LOADI x, LOAD y, add], s, [aval (Plus x y) s])
+= (3, s, [aval (Plus x y) s]) -- aval (Plus x y) s can be simplified to x and the value which corresponds to y in the state
+= (3, s, [x + x1])
+Thus LHS == RHS
+This proves the general case for Plus and therefore the statements are always equal for plus. Additionally, because this has been proven for Plus x y which are general cases, it is therefore true for recursive cases like Plus (Plus x y) (Plus x y) and so on. 
